@@ -9,12 +9,12 @@ precedence = (
     ("nonassoc", "IFX"),
     ("nonassoc", "ELSE"),
 
-    ("right", "SUBMATRIX"),
+    # ("right", "SUBMATRIX"),
     ("right", '=', 'ADDASSIGN', 'SUBASSIGN', 'MULASSIGN', 'DIVASSIGN'),
     ("left", 'EQUALS', 'NOTEQUALS', '>', '<', 'LESEQ', 'MOREEQ'),
     ("left", '+', '-', 'DOTADD', 'DOTSUB'),
     ("left", '*', '/', 'DOTMUL', 'DOTDIV'),
-    ("right", 'ONES', 'ZEROS', 'EYE'),
+    # ("right", 'ONES', 'ZEROS', 'EYE'),
     ("left", "'"),
     ("right", ":"),
     ("left", "NEG"),
@@ -85,7 +85,7 @@ def p_expression(p):
                  | sub_matrix SUBASSIGN expression
                  | sub_matrix MULASSIGN expression
                  | sub_matrix DIVASSIGN expression
-                 | sub_matrix %prec SUBMATRIX
+                 | sub_matrix
                  | EYE '(' expression ')'
                  | ZEROS '(' expression ')'
                  | ONES '(' expression ')'
