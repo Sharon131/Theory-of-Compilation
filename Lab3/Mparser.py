@@ -10,7 +10,6 @@ precedence = (
     ("nonassoc", "IFX"),
     ("nonassoc", "ELSE"),
 
-    ("right", "SUBMATRIX"),
     ("right", '=', 'ADDASSIGN', 'SUBASSIGN', 'MULASSIGN', 'DIVASSIGN'),
     ("left", 'EQUALS', 'NOTEQUALS', '>', '<', 'LESEQ', 'MOREEQ'),
     ("left", '+', '-', 'DOTADD', 'DOTSUB'),
@@ -29,12 +28,17 @@ def p_error(p):
         print("Unexpected end of input")
 
 
-def p_program(p):
+def p_instructions(p):
     """
-    program : instruction
-              | program instruction
+    instructions : instruction
+              | instructions instruction
     """
-    p[0] = p[1]
+    if len(p) == 2:
+        p[0] = AST.Instructions([p[1]])
+    else:
+        instr = p[1]
+        p[1].instructions.append(p[2])
+        p[0] = instr
 
 
 def p_instruction(p):
@@ -56,43 +60,52 @@ def p_instruction(p):
         p[0] = p[1]
 
 
-def p_instructions(p):
-    """
-    instructions : instructions instruction
-                   | instruction
-    """
-    # p[0] = AST
-
-
 def p_empty_instr(p):
     """
     empty_instr : ';'
                   | '{' '}'
     """
-    # p[0] = 0            # TODO
+    p[0] = AST.Instructions([])
 
 
 def p_expression(p):
     """
     expression :   binary_expr
-                 | negation
                  | compare_expr
+                 | negation
                  | assignment
                  | mcreate
+                 | sub_matrix
                  | transposition
                  | '(' expression ')'
-                 | '[' ']'
-                 | '[' vector ']'
+                 | pvector
                  | int
                  | float
                  | string
                  | variable
     """
-    p[0] = p[1]
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = p[2]
 
-    # | sub_matrix % prec SUBMATRIX
-    # sub_matrix : expression '[' vector ']'
-    #             | expression '[' range ']'
+
+def p_submatrix(p):
+    """
+    sub_matrix : expression pvector
+    """
+    p[0] = AST.Submatrix(p[1], p[2])
+
+
+def p_parenthesised_vector(p):
+    """
+    pvector : '[' ']'
+             | '[' vector ']'
+    """
+    if len(p) == 4:
+        p[0] = AST.Vector(p[2])
+    else:
+        p[0] = AST.Vector([])
 
 
 def p_vector(p):
@@ -101,10 +114,10 @@ def p_vector(p):
              | vector ',' expression
     """
     if len(p) == 2:
-        p[0] = p[1]
+        p[0] = [p[1]]
     else:
         p[0] = p[1]
-        p[0] += [p[3]]
+        p[0].append(p[3])
 
 
 def p_int(p):
@@ -145,26 +158,20 @@ def p_binary_expr(p):
                  | expression DOTSUB expression
                  | expression DOTMUL expression
                  | expression DOTDIV expression
-                 | expression '>' expression
-                 | expression '<' expression
-                 | expression LESEQ expression
-                 | expression MOREEQ expression
-                 | expression NOTEQUALS expression
-                 | expression EQUALS expression
     """
     p[0] = AST.BinExpr(p[2], p[1], p[3])
 
 
-# def p_compare_expr(p):
-#     """
-#     compare_expr :  expression '>' expression
-#                   | expression '<' expression
-#                   | expression LESEQ expression
-#                   | expression MOREEQ expression
-#                   | expression NOTEQUALS expression
-#                   | expression EQUALS expression
-#     """
-#     p[0] = AST.BinExpr(p[2], p[1], p[3])
+def p_compare_expr(p):
+    """
+    compare_expr :  expression '>' expression
+                  | expression '<' expression
+                  | expression LESEQ expression
+                  | expression MOREEQ expression
+                  | expression NOTEQUALS expression
+                  | expression EQUALS expression
+    """
+    p[0] = AST.BinExpr(p[2], p[1], p[3])
 
 
 def p_negation(p):
@@ -176,30 +183,19 @@ def p_negation(p):
 
 def p_assignment(p):
     """
-    assignment : ID '=' expression
-                 | ID ADDASSIGN expression
-                 | ID SUBASSIGN expression
-                 | ID MULASSIGN expression
-                 | ID DIVASSIGN expression
-
+    assignment : variable '=' expression
+                 | variable ADDASSIGN expression
+                 | variable SUBASSIGN expression
+                 | variable MULASSIGN expression
+                 | variable DIVASSIGN expression
+                 | sub_matrix '=' expression
+                 | sub_matrix ADDASSIGN expression
+                 | sub_matrix SUBASSIGN expression
+                 | sub_matrix MULASSIGN expression
+                 | sub_matrix DIVASSIGN expression
     """
-    # p[0] = AST.Assignment()
+    p[0] = AST.Assignment(p[1], p[2], p[3])
 
-# | sub_matrix
-# '='
-# expression
-# | sub_matrix
-# ADDASSIGN
-# expression
-# | sub_matrix
-# SUBASSIGN
-# expression
-# | sub_matrix
-# MULASSIGN
-# expression
-# | sub_matrix
-# DIVASSIGN
-# expression
 
 def p_transposition(p):
     """
@@ -214,21 +210,21 @@ def p_mcreate(p):
              | ZEROS '(' expression ')'
              | ONES '(' expression ')'
     """
-    p[0] = AST.UnaryExpr(p[1], p[3])
+    p[0] = AST.UnaryExpr(p[1].upper(), p[3])
 
 
 def p_break_stmt(p):
     """
     break_stmt : BREAK ';'
     """
-    p[0] = AST.BreakStatement(p[1])
+    p[0] = AST.BreakStatement()
 
 
 def p_continue_stmt(p):
     """
     continue_stmt : CONTINUE ';'
     """
-    p[0] = AST.ContinueStatement(p[1])
+    p[0] = AST.ContinueStatement()
 
 
 def p_return_stmt(p):
@@ -242,7 +238,7 @@ def p_print_stmt(p):
     """
     print_stmt : PRINT vector ';'
     """
-    AST.PrintStatement(p[2])
+    p[0] = AST.PrintStatement(p[2])
 
 
 def p_range(p):
@@ -257,19 +253,22 @@ def p_if_stmt(p):
     if_stmt : IF '(' expression ')' instruction %prec IFX
             | IF '(' expression ')' instruction ELSE instruction
     """
-    # p[0] = AST.IfStatement()
+    if len(p) == 6:
+        p[0] = AST.IfStatement(p[3], p[5])
+    else:
+        p[0] = AST.IfStatement(p[3], p[5], p[7])
 
 
 def p_while_stmt(p):
     """
     while_stmt : WHILE '(' expression ')' instruction
     """
-    # p[0] = AST.whileLoop()
+    p[0] = AST.WhileLoop(p[3], p[5])
 
 
 def p_for_stmt(p):
     """
-    for_stmt : FOR ID '=' range instruction
+    for_stmt : FOR variable '=' range instruction
     """
     p[0] = AST.ForLoop(p[2], p[4], p[5])
 

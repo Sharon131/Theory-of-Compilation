@@ -3,9 +3,9 @@ class Node(object):
     pass
 
 
-class Program(Node):
-    def __init__(self, value):
-        self.value = value
+class Instructions(Node):
+    def __init__(self, instructions):
+        self.instructions = instructions
 
 
 class IntNum(Node):
@@ -28,6 +28,17 @@ class Variable(Node):
         self.name = name
 
 
+class Submatrix(Node):
+    def __init__(self, var, vector):
+        self.var = var
+        self.vector = vector
+
+
+class Vector(Node):
+    def __init__(self, values):
+        self.values = values
+
+
 class BinExpr(Node):
     def __init__(self, op, left, right):
         self.op = op
@@ -41,14 +52,21 @@ class UnaryExpr(Node):
         self.arg = arg
 
 
+class Assignment(Node):
+    def __init__(self, var, op, value):
+        self.var = var
+        self.op = op
+        self.value = value
+
+
 class BreakStatement(Node):
-    def __init__(self, name):
-        self.name = name
+    def __init__(self):
+        pass
 
 
 class ContinueStatement(Node):
-    def __init__(self, name):
-        self.name = name
+    def __init__(self):
+        pass
 
 
 class ReturnStatement(Node):
@@ -67,33 +85,29 @@ class RangeStatement(Node):
         self.right = right
 
 
-class RangeStatement(Node):
-    def __init__(self, op, left, right):
-        self.op = op
-        self.left = left
-        self.right = right
-
-
 class IfStatement(Node):
-    def __init__(self, condition, if_block, else_block):
+    def __init__(self, condition, if_block, else_block=None):
         self.condition = condition
         self.if_block = if_block
         self.else_block = else_block
 
 
 class WhileLoop(Node):
-    def __init__(self, condition, instruction):
+    def __init__(self, condition, instructions):
         self.condition = condition
-        self.instruction = instruction
+        self.instructions = instructions
 
 
 class ForLoop(Node):
-    def __init__(self, var, range, instruction):
+    def __init__(self, var, for_range, instructions):
         self.var = var
-        self.range = range
-        self.instruction = instruction
+        self.for_range = for_range
+        self.instructions = instructions
 
 
 class Error(Node):
     def __init__(self):
         pass
+
+
+from TreePrinter import addToClass
