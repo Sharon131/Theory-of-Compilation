@@ -17,6 +17,7 @@ precedence = (
     ("right", 'ONES', 'ZEROS', 'EYE'),
     ("left", "'"),
     ("right", ":"),
+    ("right", 'ID', '['),
     ("left", "NEG"),
 )
 
@@ -94,7 +95,7 @@ def p_submatrix(p):
     """
     sub_matrix : expression pvector
     """
-    p[0] = AST.Submatrix(p[1], p[2], p.lineno(1))
+    p[0] = AST.Submatrix(p[1], p[2], p.lineno(2))
 
 
 def p_parenthesised_vector(p):
@@ -194,7 +195,7 @@ def p_assignment(p):
                  | sub_matrix MULASSIGN expression
                  | sub_matrix DIVASSIGN expression
     """
-    p[0] = AST.Assignment(p[1], p[2], p[3], p.lineno(1))
+    p[0] = AST.Assignment(p[1], p[2], p[3], p.lineno(2))
 
 
 def p_transposition(p):
@@ -206,11 +207,11 @@ def p_transposition(p):
 
 def p_mcreate(p):
     """
-    mcreate :  EYE '(' expression ')'
-             | ZEROS '(' expression ')'
-             | ONES '(' expression ')'
+    mcreate :  EYE '(' vector ')'
+             | ZEROS '(' vector ')'
+             | ONES '(' vector ')'
     """
-    p[0] = AST.UnaryExpr(p[1].upper(), p[3], p.lineno(1))
+    p[0] = AST.CreateMatrix(p[1].upper(), p[3], p.lineno(1))
 
 
 def p_break_stmt(p):

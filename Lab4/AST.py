@@ -1,6 +1,5 @@
-# add detecting functions
-# detecting wrong matrix recall
-# add checking eye,zeros,ones
+
+
 class Node(object):
     # def __init__(self, lineno):
     #     self.lineno = lineno
@@ -59,6 +58,13 @@ class BinExpr(Node):
 
 
 class UnaryExpr(Node):
+    def __init__(self, op, arg, line_no):
+        self.op = op
+        self.arg = arg
+        self.line_no = line_no
+
+
+class CreateMatrix(Node):
     def __init__(self, op, arg, line_no):
         self.op = op
         self.arg = arg
