@@ -197,7 +197,8 @@ class TypeChecker(NodeVisitor):
 
     def visit_Assignment(self, node):
         type1 = self.visit(node.value)
-        self.table.put(node.var.name, type1)
+        if not isinstance(node.var, AST.Submatrix):
+            self.table.put(node.var.name, type1)
 
     def visit_BreakStatement(self, node):
         if self.loop_counter == 0:
@@ -261,7 +262,7 @@ class TypeChecker(NodeVisitor):
         if type2 != Type.RangeType:
             print("Line {0}: Error in range".format(node.line_no))
 
-        self.table.put(node.var, type2)
+        self.table.put(node.var.name, Type.IntNumType)
 
         self.loop_counter += 1
         self.table.pushScope("for")

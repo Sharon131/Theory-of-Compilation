@@ -19,11 +19,11 @@ ffun_bin['*'] = lambda first, second: first * second
 ffun_bin['/'] = lambda first, second: first / second
 
 ffun_bin['<'] = lambda first, second: first < second
-ffun_bin['>'] = lambda a, b: a > b
-ffun_bin['=='] = lambda a, b: a == b
-ffun_bin['!='] = lambda a, b: a != b
-ffun_bin['<='] = lambda a, b: a <= b
-ffun_bin['>='] = lambda a, b: a >= b
+ffun_bin['>'] = lambda first, second: first > second
+ffun_bin['=='] = lambda first, second: first == second
+ffun_bin['!='] = lambda first, second: first != second
+ffun_bin['<='] = lambda first, second: first <= second
+ffun_bin['>='] = lambda first, second: first >= second
 
 ffun_unary = defaultdict(lambda arg: typing.Any)
 
@@ -47,7 +47,6 @@ class Interpreter(object):
     def visit(self, node):
         for instruction in node.instructions:
             instruction.accept(self)
-            # self.visit(instruction)
 
     @when(AST.IntNum)
     def visit(self, node):
@@ -96,8 +95,12 @@ class Interpreter(object):
 
     @when(AST.CreateMatrix)
     def visit(self, node):
-        val = node.arg.accept(self)
-        return ffun_bin[node.op](val)
+        # val = node.arg.accept(self)
+        if len(node.arg) == 1:
+            return ffun_unary[node.op](node.arg[0].value)
+        else:
+
+            return ffun_unary[node.op](tuple(AST.Vector(node.arg, node.line_no).accept(self)))
 
     @when(AST.Assignment)
     def visit(self, node):
@@ -113,7 +116,11 @@ class Interpreter(object):
                 value = node.value.accept(self)
                 var[indices] = value
             else:
-                self.memory_stack.insert(node.var.name, value)
+                var = node.var.accept(self)
+                if var is None:
+                    self.memory_stack.insert(node.var.name, value)
+                else:
+                    self.memory_stack.set(node.var.name, value)
 
     @when(AST.BreakStatement)
     def visit(self, node):
@@ -143,9 +150,9 @@ class Interpreter(object):
     def visit(self, node):
         self.memory_stack.push(Memory('if'))
         if node.condition.accept(self):
-            node.if_block.accept(self)  # check if its one instruction or list of them in Instructions class
+            node.if_block.accept(self)
         elif node.else_block is not None:
-            node.else_block.accept(self)  # should actually be ok
+            node.else_block.accept(self)
 
     # simplistic while loop interpretation
     @when(AST.WhileLoop)
