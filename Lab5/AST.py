@@ -3,7 +3,8 @@
 class Node(object):
     # def __init__(self, lineno):
     #     self.lineno = lineno
-    pass
+    def accept(self, visitor):
+        return visitor.visit(self)
 
 
 class Instructions(Node):

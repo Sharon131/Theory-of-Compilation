@@ -1,36 +1,57 @@
 
 class Memory:
 
-    def __init__(self, name): # memory name
-        pass
+    def __init__(self, name, parent=None):  # memory name
+        self.vars = dict()
+        self.name = name
 
     def has_key(self, name):  # variable name
-        pass
+        if name in self.vars:
+            return True
+        else:
+            return False
 
     def get(self, name):         # gets from memory current value of variable <name>
-        pass
+        if name in self.vars:
+            return self.vars[name]
+        else:
+            return None
 
     def put(self, name, value):  # puts into memory current value of variable <name>
-        pass
+        self.vars[name] = value
 
 
 class MemoryStack:
 
-    def __init__(self, memory=None): # initialize memory stack with memory <memory>
-        pass
+    def __init__(self, memory=None):  # initialize memory stack with memory <memory>
+        self.stack = []
+        self.size = 0
+        if memory is not None:
+            self.push(memory)
 
     def get(self, name):             # gets from memory stack current value of variable <name>
-        pass
+        for i in reversed(range(self.size)):
+            if self.stack[i].has_key(name):
+                return self.stack[i].get(name)
+        return None
+        # iterate over all stack to find that variable
 
     def insert(self, name, value): # inserts into memory stack variable <name> with value <value>
-        pass
+        self.stack[self.size-1].put(name, value)
 
     def set(self, name, value): # sets variable <name> to value <value>
-        pass
+        for i in reversed(range(self.size)):
+            if self.stack[i].has_key(name):
+                self.stack[i].put(name, value)
+                return True
+        return False
 
     def push(self, memory): # pushes memory <memory> onto the stack
-        pass
+        self.stack.append(memory)
+        self.size += 1
 
     def pop(self):          # pops the top memory from the stack
-        pass
+        self.size -= 1
+        return self.stack.pop()
+
 

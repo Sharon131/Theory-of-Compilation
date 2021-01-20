@@ -112,7 +112,8 @@ def p_parenthesised_vector(p):
 def p_vector(p):
     """
     vector : expression
-             | vector ',' expression
+            | range
+            | vector ',' expression
     """
     if len(p) == 2:
         p[0] = [p[1]]

@@ -39,7 +39,8 @@ D2 -= A.-B' ; # substract element-wise A with transpose of B
 D3 *= A.*B' ; # multiply element-wise A with transpose of B
 D4 /= A./B' ; # divide element-wise A with transpose of B
 ```
-analizator leksykalny powinien zwracać następującą sekwencję i wypisywać ją na standardowym wyjściu:   
+analizator leksykalny powinien zwracać następującą sekwencję i wypisywać ją na standardowym wyjściu: 
+```  
 (1): ID(A)   
 (1): =(=)   
 (1): ZEROS(zeros)   
@@ -89,6 +90,7 @@ analizator leksykalny powinien zwracać następującą sekwencję i wypisywać j
 (7): ID(B)   
 (7): '(')   
 (7): ;(;)  
+```
 
 Do rozwiązania zadania należy użyć generatora skanerów, np. generatora PLY.    
 Skaner powinien rozpoznawać niepoprawne leksykalnie wejście. W takim przypadku powinien zostać wypisany numer niepoprawnej linii wraz z szczegółową informacją o błędzie.
